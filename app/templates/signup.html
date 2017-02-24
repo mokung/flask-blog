@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up{% endblock %}
+    {% block head %}
+        {{ super() }}
+<script>
+
+function validateEmail(email) {
+    var re = /^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$/;
+    return re.test(email.toLowerCase());
+}
+
+function tip(msg){
+      $(".alert").show().html(msg);
+      setTimeout(function() {
+        $(".alert").hide('blind', {}, 500)
+    }, 500);
+}
+
+
+function checkForm(){
+       var name = $("#inputName").val();
+        var email = $("#inputEmail").val();
+        var password1 = $("#inputPassword").val();
+        var password2 = $("#confirmPassword").val();
+        if (!name) {
+            tip("请输入名字!");
+            return false;
+        }
+        if (! validateEmail(email.trim().toLowerCase())) {
+             tip("请输入正确的Email地址!")
+            return false;
+        }
+        if (password1.length < 6) {
+           tip("密码长度至少为6个字符!")
+            return false;
+
+        }
+        if (password1 !== password2) {
+           tip("两次输入的密码不一致!")
+            return fasle;
+        }
+
+        var passwd = CryptoJS.SHA1(email + ':' + password1).toString();
+        document.getElementById("inputPassword").value= passwd;
+        document.getElementById("confirmPassword").value= passwd;
+        return true;
+
+  }
+
+</script>
+    {% endblock %}
+{% block page_content %}
+<div class="alert alert-dismissible alert-danger" hidden="hidden">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+</div>
+<form class="form-horizontal" action="/auth/register" id="signForm" method="post" onsubmit="return checkForm();">
+  <fieldset>
+    <legend>Sign Up</legend>
+    <div class="form-group">
+      <label for="inputName" class="col-lg-2 control-label">Name</label>
+      <div class="col-lg-5">
+        <input type="text" name="name" class="form-control" id="inputName" placeholder="Name">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+      <div class="col-lg-5">
+        <input type="text" name="email" class="form-control" id="inputEmail" placeholder="Email">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputPassword" class="col-lg-2 control-label">Password</label>
+      <div class="col-lg-5">
+        <input type="password" name="passwd" class="form-control" id="inputPassword" placeholder="Password">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="confirmPassword" class="col-lg-2 control-label">Confirm</label>
+      <div class="col-lg-5">
+        <input  type="password" class="form-control" id="confirmPassword" placeholder="Password">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"> Checkbox
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-lg-10 col-lg-offset-2">
+        <button type="submit" id="subminBtn" class="btn btn-primary" >Submit</button>
+      </div>
+    </div>
+  </fieldset>
+</form>
+{% endblock %}
+
+

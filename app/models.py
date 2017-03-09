@@ -67,6 +67,14 @@ class Blog(db.Model):
         db.session.merge(blog)
         db.session.commit()
 
+    def tojosn(self):
+        return {
+            'id': self.id,
+            'title' : self.title,
+            'summary':self.summary,
+            'content':self.content,
+            'created_time':self.created_time.strftime('%Y-%m-%d %H:%M:%S')
+        }
 
 class Comment(db.Model):
     __tablename__ = 'comments'

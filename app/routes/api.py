@@ -2,7 +2,7 @@ import os
 
 import re
 
-from flask import make_response
+from flask import make_response, jsonify
 
 import app
 from flask import Blueprint, request, redirect, url_for, render_template
@@ -12,7 +12,7 @@ from config import basedir
 from app.Uploader import Uploader
 from flask_login import current_user, login_required
 from app.models import Blog, User, Comment
-from app.checker import check_admin
+from app.checker import check_admin, toJson
 
 api = Blueprint('api', __name__, url_prefix="/api")
 
@@ -33,6 +33,16 @@ def api_post():
     blog = Blog(user_id=user_id, title=title, summary=summary, content=content)
     blog.save()
     return redirect(request.args.get('next') or url_for('views.blogs'))
+
+
+@api.route('/search')
+def api_search():
+    keyword = request.args.get("keyword")
+    blogs = Blog.query.filter(Blog.title.ilike("%"+keyword+"%")).all()
+    result = []
+    for blog in blogs:
+        result.append(blog.tojosn())
+    return json.dumps(result)
 
 
 @api.route('/edit/<blog_id>', methods=['POST'])

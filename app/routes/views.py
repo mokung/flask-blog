@@ -61,3 +61,14 @@ def post():
         flash('没有访问权限！')
         return redirect(url_for('views.blogs'))
     return render_template('edit.html')
+
+
+@views.route('/search')
+def search():
+    keyword = request.args.get("keyword")
+    page = setPositive(request.args.get('page'))
+    size = setPositive(request.args.get('size'), 10)
+    p = Paginate(Blog.query.filter(Blog.title.ilike("%"+keyword+"%"), Blog.is_deleted==False).count(), page, size)
+    blogs = Blog.query.filter(Blog.title.ilike("%"+keyword+"%"), Blog.is_deleted==False).order_by(Blog.created_time.desc()).offset(p.offset).limit(p.limit).all()
+    admin = check_admin()
+    return render_template('blogs.html', blogs=blogs, page=p, admin=admin ,keyword = keyword)

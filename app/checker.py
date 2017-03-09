@@ -17,6 +17,14 @@ class Paginate(object):
         self.limit = size
 
 
+def toJson(object):
+    result = {}
+    for over_name in dir(object):
+        if not over_name.startswith("_"):
+            result[over_name] = object.over_name
+    return result
+
+
 def check_empty(**kw):
     for key, string in kw.items():
         if not string or not string.strip():

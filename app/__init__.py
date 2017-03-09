@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -21,4 +23,6 @@ def create_app(config_name):
     app.register_blueprint(views)
     from app.routes.auth import auth
     app.register_blueprint(auth)
+    from app.routes.api import api
+    app.register_blueprint(api)
     return app

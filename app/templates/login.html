@@ -26,12 +26,10 @@ function checkForm(){
         if (password.length==0) {
            tip("密码不能为空!")
             return false;
-
         }
         var passwd = CryptoJS.SHA1(email + ':' + password).toString();
         document.getElementById("inputPassword").value= passwd;
         return true;
-
   }
 
 </script>
@@ -44,24 +42,24 @@ function checkForm(){
   <fieldset>
     <legend>Login</legend>
     <div class="form-group">
-      <label for="inputEmail" class="col-lg-2 control-label">Email</label>
-      <div class="col-lg-5">
+      <label for="inputEmail" class="col-sm-2 col-lg-2 control-label">Email</label>
+      <div class="col-sm-5 col-lg-5">
         <input type="text" name="email"  class="form-control" id="inputEmail" placeholder="Email">
       </div>
     </div>
     <div class="form-group">
-      <label for="inputPassword" class="col-lg-2 control-label">Password</label>
-      <div class="col-lg-5">
+      <label for="inputPassword" class="col-sm-2 col-lg-2 control-label">Password</label>
+      <div class="col-sm-5 col-lg-5">
         <input type="password" name="passwd" class="form-control" id="inputPassword" placeholder="Password">
         <div class="checkbox">
           <label>
-            <input type="checkbox"> Checkbox
+            <input name="remember" type="checkbox" id="remember" value="1"> remember me
           </label>
         </div>
       </div>
     </div>
     <div class="form-group">
-      <div class="col-lg-10 col-lg-offset-2">
+      <div class="col-lg-10 col-sm-offset-2 col-lg-offset-2">
         <button type="submit" id="loginBtn" class="btn btn-primary">Submit</button>
       </div>
     </div>

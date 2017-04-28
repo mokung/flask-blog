@@ -3,7 +3,7 @@ import time
 import uuid
 from flask import current_app
 from flask_login import UserMixin
-from sqlalchemy.orm import session
+
 
 from app import db, login_manager
 
@@ -45,6 +45,7 @@ class User(db.Model, UserMixin):
         passwd = hashlib.sha1(sha1_pw.encode('utf-8')).hexdigest()
         return self.passwd == passwd
 
+    @property
     def is_admin(self):
         return not self.is_anonymous and self.admin == 1
 
@@ -63,6 +64,7 @@ class Blog(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    @classmethod
     def update(blog):
         db.session.merge(blog)
         db.session.commit()
@@ -83,15 +85,20 @@ class Comment(db.Model):
     user_id = db.Column(db.String(50), nullable=False)
     content = db.Column(db.Text(), nullable=False)
     created_time = db.Column(db.String(20), nullable=False, default=now)
+    is_deleted = db.Column(db.Boolean, nullable=True, default=False)
 
     def save(self):
         db.session.add(self)
         db.session.commit()
 
+    def update(comment):
+        db.session.merge(comment)
+        db.session.commit()
+
     @classmethod
     def get_comments_by_blog_id(cls, blog_id):
-        result = db.session.query(Comment.content, Comment.created_time, User.name). \
-            join(User, Comment.user_id == User.id).filter(Comment.blog_id == blog_id). \
+        result = db.session.query(Comment.id, Comment.content, Comment.created_time, User.name). \
+            join(User, Comment.user_id == User.id).filter(Comment.blog_id == blog_id, Comment.is_deleted==0). \
             order_by(Comment.created_time.desc()).all()
         return result
 

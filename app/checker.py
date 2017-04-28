@@ -45,7 +45,3 @@ def setPositive(numStr, default=1):
         return default
     return num if num > 0 else default
 
-
-def check_admin():
-    admin = User.is_admin(current_user)
-    return admin

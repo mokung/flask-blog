@@ -12,7 +12,7 @@ from config import basedir
 from app.Uploader import Uploader
 from flask_login import current_user, login_required
 from app.models import Blog, User, Comment
-from app.checker import check_admin, toJson
+from app.checker import toJson
 
 api = Blueprint('api', __name__, url_prefix="/api")
 
@@ -20,7 +20,7 @@ api = Blueprint('api', __name__, url_prefix="/api")
 @api.route('/post', methods=['POST'])
 @login_required
 def api_post():
-    if not check_admin():
+    if not current_user.is_admin:
         flash('没有访问权限！')
         return redirect(url_for('views.blogs'))
     user_id = current_user.get_id()
@@ -38,39 +38,51 @@ def api_post():
 @api.route('/search')
 def api_search():
     keyword = request.args.get("keyword")
-    blogs = Blog.query.filter(Blog.title.ilike("%"+keyword+"%")).all()
+    blogs = Blog.query.filter(Blog.title.ilike("%" + keyword + "%")).all()
     result = []
     for blog in blogs:
         result.append(blog.tojosn())
-    return json.dumps(result)
+    return Response(json.dumps(result), content_type="application/json")
 
 
 @api.route('/edit/<blog_id>', methods=['POST'])
 @login_required
 def api_edit(blog_id):
-    if not check_admin():
+    if not current_user.is_admin:
         flash('没有访问权限！')
-        return redirect(url_for('views.blogs'))
+        return redirect(request.referrer or url_for('views.blogs'))
     title = request.form["title"]
     summary = request.form["summary"]
     content = request.form["content"]
     if not title or not content:
         flash('没有标题或内容为空！')
-        return False
+        return redirect(request.referrer)
     blog = Blog(id=blog_id, title=title, summary=summary, content=content)
     Blog.update(blog)
-    return redirect(request.args.get('next') or url_for('views.blog', blog_id=blog_id))
+    return redirect(url_for('views.blog', blog_id=blog_id))
 
 
 @api.route('/delete/blog/<blog_id>')
 @login_required
 def api_delete_blog(blog_id):
-    if not check_admin():
+    if not current_user.is_admin:
         flash('没有访问权限！')
-        return redirect(url_for('views.blogs'))
+        return redirect(request.referrer or url_for('views.blogs'))
     blog = Blog(id=blog_id, is_deleted=True)
-    Blog.update(blog)
-    return redirect(request.args.get('next') or url_for('views.blogs'))
+    blog.update()
+    return redirect(url_for('views.blogs'))
+
+
+@api.route('/delete/comment')
+@login_required
+def api_delete_comment():
+    if not current_user.is_admin:
+        flash('没有访问权限！')
+        return Response(json.dumps({"code": "000001", "message": "fail"}), content_type="application/json")
+    comment_id = request.args.get("id")
+    comment = Comment(id=comment_id, is_deleted=True)
+    Comment.update(comment)
+    return Response(json.dumps({"code": "000000", "message": "ok"}), content_type="application/json")
 
 
 @api.route('/comment/<blog_id>', methods=['POST'])
@@ -80,10 +92,13 @@ def api_comment(blog_id):
     content = request.form["content"]
     if not blog_id or not content or content == "":
         flash('评论内容为空！')
-        return False
+        return redirect(request.referrer or url_for('views.index'))
+    if len(content) > 5000:
+        flash('评论内容长度超过5000(包含html标签)!')
+        return redirect(request.referrer or url_for('views.index'))
     comment = Comment(blog_id=blog_id, user_id=user_id, content=content)
     comment.save()
-    return redirect(request.args.get('next') or url_for('views.index'))
+    return redirect(request.referrer or url_for('views.index'))
 
 
 @api.route('/upload/', methods=['GET', 'POST'])

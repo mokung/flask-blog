@@ -3,6 +3,7 @@ from flask import Response,flash
 from flask_login import login_user, logout_user
 from app.models import User
 from app.checker import check_empty,check_email_and_passwd
+
 auth = Blueprint('auth', __name__, url_prefix="/auth")
 
 
@@ -47,7 +48,7 @@ def auth_login():
         else:
             rememberme = False
         login_user(user, rememberme)
-        return redirect(request.args.get('next') or url_for('views.index'))
+        return redirect(url_for('views.index'))
     return Response("Fail！")
 
 # 登出

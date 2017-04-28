@@ -10,10 +10,10 @@
 <div class="container" id="post-container" >
     {% if blogs %}
         {% for blog in blogs %}
-            <div class="row col-sm-9 col-lg-10">
+            <div class="row col-sm-9 col-lg-10 blog-box">
                 <h2><a href="blog/{{ blog.id }}">{{ blog.title }}</a></h2>
                 <p><small>发表于 {{ blog.created_time }}</small>
-                    {% if current_user.is_authenticated and admin %}
+                    {% if current_user.is_authenticated and current_user.is_admin %}
                     <a href="/api/delete/blog/{{ blog.id }}" class="setting">删除</a>
                     <span class="setting" style="float:right;">|</span>
                     <a href="/edit/{{ blog.id }}" class="setting">编辑</a>
@@ -23,7 +23,7 @@
                     {% if blog.summary %}
                     <p>{{blog.summary}}</p>
                     {% else %}
-                    <p>{{blog.content}}</p>
+                    <p>{{blog.content|safe|truncate(200)}}</p>
                     {% endif %}<a href="blog/{{ blog.id }}" class="btn btn-primary btn-xs">阅读全文</a>
                 </div>
 
@@ -49,8 +49,8 @@
             </nav>
         </div>
     {% else %}
-    <div class="row col-sm-9 col-lg-10">
-        <h3 align="center">无文章</h3>
+    <div class="center-Box">
+        无文章
     </div>
     {% endif %}
 

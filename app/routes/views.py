@@ -2,10 +2,11 @@ from flask import Blueprint, render_template, request, app
 from flask import Response
 from flask import flash
 from flask import url_for
+from flask_login import current_user
 from flask_login import login_required
 from werkzeug.utils import redirect
 
-from app.checker import setPositive, Paginate, check_admin
+from app.checker import setPositive, Paginate
 from app.models import Blog, Comment, User
 
 views = Blueprint('views', __name__)
@@ -31,23 +32,22 @@ def blogs():
     page = setPositive(request.args.get('page'))
     size = setPositive(request.args.get('size'), 10)
     p = Paginate(Blog.query.count(), page, size)
-    blogs = Blog.query.filter_by(is_deleted=False).order_by(Blog.created_time.desc()).offset(p.offset).limit(p.limit).all()
-    admin = check_admin()
-    return render_template('blogs.html', blogs=blogs, page=p, admin=admin)
+    blogs = Blog.query.filter_by(is_deleted=False).order_by(Blog.created_time.desc()).offset(p.offset).limit(
+        p.limit).all()
+    return render_template('blogs.html', blogs=blogs, page=p)
 
 
 @views.route('/blog/<blog_id>')
 def blog(blog_id):
     blog = Blog.query.filter_by(id=blog_id).first()
     comments = Comment.get_comments_by_blog_id(blog_id)
-    admin = check_admin()
-    return render_template('blog.html', blog=blog, comments=comments, admin=admin)
+    return render_template('blog.html', blog=blog, comments=comments)
 
 
 @views.route('/edit/<blog_id>')
 @login_required
 def edit(blog_id):
-    if not check_admin():
+    if not current_user.is_admin:
         flash('没有访问权限！')
         return redirect(url_for('views.blogs'))
     blog = Blog.query.filter_by(id=blog_id).first()
@@ -57,7 +57,7 @@ def edit(blog_id):
 @views.route('/post')
 @login_required
 def post():
-    if not check_admin():
+    if not current_user.is_admin:
         flash('没有访问权限！')
         return redirect(url_for('views.blogs'))
     return render_template('edit.html')
@@ -68,7 +68,7 @@ def search():
     keyword = request.args.get("keyword")
     page = setPositive(request.args.get('page'))
     size = setPositive(request.args.get('size'), 10)
-    p = Paginate(Blog.query.filter(Blog.title.ilike("%"+keyword+"%"), Blog.is_deleted==False).count(), page, size)
-    blogs = Blog.query.filter(Blog.title.ilike("%"+keyword+"%"), Blog.is_deleted==False).order_by(Blog.created_time.desc()).offset(p.offset).limit(p.limit).all()
-    admin = check_admin()
-    return render_template('blogs.html', blogs=blogs, page=p, admin=admin ,keyword = keyword)
+    p = Paginate(Blog.query.filter(Blog.title.ilike("%" + keyword + "%"), Blog.is_deleted == False).count(), page, size)
+    blogs = Blog.query.filter(Blog.title.ilike("%" + keyword + "%"), Blog.is_deleted == False).order_by(
+        Blog.created_time.desc()).offset(p.offset).limit(p.limit).all()
+    return render_template('blogs.html', blogs=blogs, page=p, keyword=keyword)

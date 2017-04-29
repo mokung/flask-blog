@@ -10,6 +10,7 @@ db = SQLAlchemy()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 
+
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -26,3 +27,6 @@ def create_app(config_name):
     from app.routes.api import api
     app.register_blueprint(api)
     return app
+
+
+app = create_app('development')

@@ -11,7 +11,6 @@ class Config(object):
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'mysql://root:123456@localhost:3306/awesome'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 

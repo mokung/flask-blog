@@ -65,7 +65,7 @@ class Blog(db.Model):
         db.session.commit()
 
     @classmethod
-    def update(blog):
+    def update(cls, blog):
         db.session.merge(blog)
         db.session.commit()
 
